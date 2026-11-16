@@ -2,8 +2,9 @@
 # come once a month, one grouped pull request per ecosystem.
 version: 2
 updates:
+  # tailscale/ builds against the main module, so both go.mod files move in one pull request.
   - package-ecosystem: gomod
-    directory: /
+    directories: ["/", "/tailscale"]
     schedule: { interval: monthly }
     groups: { go: { patterns: ["*"] } }
   - package-ecosystem: npm
