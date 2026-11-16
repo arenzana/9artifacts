@@ -8,6 +8,7 @@ import { formatComments, listComments, resolveComment } from './comments';
 import type { Ctx } from './env';
 import { DESIGN_MD, DIAGRAM_CSS, TEMPLATES, TEMPLATE_FILES } from './generated/web';
 import { resourceMetadataURL } from './oauth';
+import { contentMatches } from './search';
 import { fileKey, getArtifact, getVersion } from './store';
 import { artifactText } from './text';
 import { MAX_JSON_BODY, type Meta, VersionWriter, decodeJSONFiles } from './upload';
@@ -56,7 +57,7 @@ export const MCP_TOOLS = [
       'files',
     ),
   },
-  { name: 'list_artifacts', description: 'List artifacts, newest first.', inputSchema: schema({ query: strProp, tag: strProp, limit: { type: 'integer' } }) },
+  { name: 'list_artifacts', description: 'List artifacts, newest first. query matches the title, tags and the text of the page.', inputSchema: schema({ query: strProp, tag: strProp, limit: { type: 'integer' } }) },
   {
     name: 'read_artifact',
     description:
@@ -224,9 +225,11 @@ async function call(c: Ctx, name: string, a: Record<string, unknown>): Promise<s
       let limit = n(a, 'limit');
       if (limit <= 0 || limit > 200) limit = 50;
       const lines: string[] = [];
-      for (const { a: art, latest } of await listArtifacts(c)) {
+      const all = await listArtifacts(c);
+      const inText = query ? await contentMatches(c, all, query) : new Set<string>();
+      for (const { a: art, latest } of all) {
         const hay = `${art.title} ${art.tags.join(' ')}`.toLowerCase();
-        if (query && !hay.includes(query)) continue;
+        if (query && !hay.includes(query) && !inText.has(art.id)) continue;
         if (tag && !art.tags.includes(tag)) continue;
         if (lines.length >= limit) break;
         lines.push(`- ${art.id} — ${goQuote(art.title)} v${latest.n} [${art.tags.join(', ')}] updated ${utcMinute(art.updatedAt)} ${c.publicURL}/a/${art.id}\n`);

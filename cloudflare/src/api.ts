@@ -5,6 +5,7 @@ import { type Ctx, shareURL } from './env';
 import { viewBase } from './content';
 import { title as markdownTitle } from './markdown';
 import { notify } from './notify';
+import { contentMatches } from './search';
 import {
   ACTIVE_SQL, type Artifact, type FileMeta, type Share, type Version, deletePrefix, fileKey, getArtifact, getVersion,
   listShares, listVersions, shareActive, toArtifact, toShare,
@@ -113,10 +114,12 @@ export async function handleList(c: Ctx): Promise<Response> {
   const isGuest = await guest(c);
   const items: Promise<ArtifactView>[] = [];
   const tags: Record<string, number> = {};
-  for (const { a, latest, active, open } of await listArtifacts(c)) {
+  const all = await listArtifacts(c);
+  const inText = q ? await contentMatches(c, all, q) : new Set<string>();
+  for (const { a, latest, active, open } of all) {
     for (const t of a.tags) tags[t] = (tags[t] ?? 0) + 1;
     if (tag && !a.tags.includes(tag)) continue;
-    if (q && !`${a.title} ${a.tags.join(' ')} ${isGuest ? '' : a.note}`.toLowerCase().includes(q)) continue;
+    if (q && !`${a.title} ${a.tags.join(' ')} ${isGuest ? '' : a.note}`.toLowerCase().includes(q) && !inText.has(a.id)) continue;
     if (limit > 0 && items.length >= limit) continue;
     items.push(artifactView(c, a, latest, { activeShares: active, openComments: open }));
   }
@@ -331,6 +334,7 @@ export async function deleteArtifact(c: Ctx, id: string): Promise<void> {
     c.db.prepare('DELETE FROM share_visitors WHERE token IN (SELECT token FROM shares WHERE artifact_id = ?)').bind(id),
     c.db.prepare('DELETE FROM shares WHERE artifact_id = ?').bind(id),
     c.db.prepare('DELETE FROM comments WHERE artifact_id = ?').bind(id),
+    c.db.prepare('DELETE FROM search_text WHERE artifact_id = ?').bind(id),
     c.db.prepare('DELETE FROM versions WHERE artifact_id = ?').bind(id),
     c.db.prepare('DELETE FROM artifacts WHERE id = ?').bind(id),
   ]);

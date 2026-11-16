@@ -315,7 +315,7 @@ Pages here are HTML made for people. Agents should read the text form instead: M
 
 - ${u}/api/artifacts/{id}/text (add ?v=N for an older version), or the page URL ${u}/a/{id} with the header "Accept: text/markdown"
 - A share link (${share}/s/...): add ?format=md, or send "Accept: text/markdown". A password-protected link has no text form.
-- ${u}/api/artifacts?q=words lists artifacts as JSON; q matches titles and tags
+- ${u}/api/artifacts?q=words lists artifacts as JSON; q matches titles, tags and page text
 - The raw files: MCP tool read_artifact, or ${u}/api/artifacts/{id}/download/{file}
 
 ## Publish
