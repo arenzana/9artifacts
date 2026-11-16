@@ -13,14 +13,13 @@
     "deploy:demo": "npm run build && wrangler deploy -c demo/wrangler.jsonc && wrangler d1 migrations apply DB --remote -c demo/wrangler.jsonc && wrangler deploy -c demo/wrangler.content.jsonc && ../scripts/smoke.sh https://demo.9artifacts.com"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "0.22.0",
+    "@cloudflare/vitest-plugin": "1.8.1",
     "typescript": "5.9.3",
-    "vitest": "4.1.11",
-    "wrangler": "4.143.1"
+    "vitest": "4.1.12",
+    "wrangler": "4.161.0"
   },
   "allowScripts": {
-    "esbuild@0.28.1": true,
-    "workerd@1.20260815.1": true,
-    "workerd@1.20260926.1": true
+    "esbuild@0.28.2": true,
+    "workerd@1.20261110.1": true
   }
 }

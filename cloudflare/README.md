@@ -104,7 +104,7 @@ Settings, and publish the sample artifacts with it.
 ```bash
 cp .dev.vars.example .dev.vars        # set SETUP_TOKEN
 npm run dev                           # http://localhost:8787 (local D1/R2 under .wrangler/)
-npm test                              # vitest inside the Workers runtime (@cloudflare/vitest-pool-workers)
+npm test                              # vitest inside the Workers runtime (@cloudflare/vitest-plugin)
 npm run typecheck
 ```
 
