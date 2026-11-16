@@ -783,6 +783,8 @@ function infoPanel() {
       h('button', { type: 'button', class: 'file-name', onclick: () => { viewer.file = f.name; const s = $('.file-select'); if (s) s.value = f.name; paintStage(); paintDrawer(); } },
         h('span', { class: `kind-pill kind-${fileKind(f.name)}`, text: KIND_LABEL[fileKind(f.name)] }), h('span', { class: 'name', text: f.name })),
       h('span', { class: 'size', text: fmtBytes(f.size) })))),
+    ['html', 'markdown'].includes(fileKind(v.entry)) ? h('div', { class: 'form-row' },
+      h('a', { class: 'btn ghost sm', href: `/api/artifacts/${a.id}/pptx?v=${v.n}`, title: 'One slide per slide or heading, as editable text' }, icon('download'), 'PowerPoint (.pptx)')) : null,
     a.versions.length > 1 ? [
       h('h3', { text: `History (${a.versions.length})` }),
       h('ul', { class: 'version-list' }, a.versions.map((x) => h('li', { class: x.n === v.n ? 'current' : '' },

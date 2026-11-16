@@ -1,8 +1,10 @@
 package app
 
 import (
+	"archive/zip"
 	"bytes"
 	"encoding/json"
+	"encoding/xml"
 	"io"
 	"log"
 	"mime/multipart"
@@ -468,6 +470,45 @@ func TestTextForm(t *testing.T) {
 	}
 	if rec := e.do("GET", "/llms.txt", nil, nil); rec.Code != 200 || !strings.Contains(rec.Body.String(), "/api/artifacts/{id}/text") {
 		t.Fatalf("llms.txt: %d", rec.Code)
+	}
+}
+
+func TestPPTXExport(t *testing.T) {
+	e := newEnv(t, Config{})
+	open := func(files map[string]string) (*httptest.ResponseRecorder, map[string]string) {
+		a := decode[artifactView](t, e.upload("/api/artifacts", map[string]string{"title": "Quý 3 & more"}, files))
+		rec := e.api("GET", "/api/artifacts/"+a.ID+"/pptx", nil)
+		parts := map[string]string{}
+		if z, err := zip.NewReader(bytes.NewReader(rec.Body.Bytes()), int64(rec.Body.Len())); err == nil {
+			for _, f := range z.File {
+				r, _ := f.Open()
+				b, _ := io.ReadAll(r)
+				parts[f.Name] = string(b)
+				if err := xml.Unmarshal(b, new(struct{})); err != nil {
+					t.Fatalf("%s is not well-formed XML: %v", f.Name, err)
+				}
+			}
+		}
+		return rec, parts
+	}
+	// A slide deck: one slide per .slide, text and bullets kept, markup escaped.
+	rec, parts := open(map[string]string{"index.html": `<section class="slide"><h1>Plan &lt;A&gt;</h1><ul><li>one<li>two</ul></section><section class="slide"><h2>Next</h2><p>Ship it</p></section>`})
+	if rec.Code != 200 || !strings.Contains(rec.Header().Get("Content-Type"), "presentationml.presentation") || !strings.Contains(rec.Header().Get("Content-Disposition"), `filename="Qu-3-more.pptx"`) {
+		t.Fatalf("pptx: %d %v", rec.Code, rec.Header())
+	}
+	s1 := parts["ppt/slides/slide1.xml"]
+	if !strings.Contains(s1, "<a:t>Plan &lt;A&gt;</a:t>") || !strings.Contains(s1, "<a:buChar") || !strings.Contains(s1, "<a:t>two</a:t>") || !strings.Contains(parts["ppt/slides/slide2.xml"], "<a:t>Ship it</a:t>") || parts["ppt/slides/slide3.xml"] != "" {
+		t.Fatalf("slides: %q", parts)
+	}
+	if !strings.Contains(parts["[Content_Types].xml"], "/ppt/slides/slide2.xml") || !strings.Contains(parts["ppt/_rels/presentation.xml.rels"], `Id="rId4"`) {
+		t.Fatal("slide 2 is not registered in the package")
+	}
+	// Any other page: one slide per h1/h2.
+	if _, parts = open(map[string]string{"notes.md": "# Intro\n\nHello\n\n## Costs\n\n- rent\n"}); !strings.Contains(parts["ppt/slides/slide2.xml"], "<a:t>Costs</a:t>") {
+		t.Fatalf("markdown sections: %q", parts)
+	}
+	if rec, _ = open(map[string]string{"photo.png": "x"}); rec.Code != 415 {
+		t.Fatalf("binary entry: %d", rec.Code)
 	}
 }
 

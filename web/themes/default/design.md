@@ -119,6 +119,10 @@ slides template: `get_design_guide` with `kind: "slides"`,
 - Keep the script as it is: arrows, space, click and swipe move; `F` goes
   fullscreen; `P` prints one slide per page, which is how the owner saves
   a PDF.
+- The owner can also download the deck as PowerPoint (Details →
+  PowerPoint). That file is built from the text: each slide's first heading
+  becomes its title and the rest editable text, without the design. So
+  every slide needs a heading, and the words must stand without the visuals.
 
 ## Documents
 

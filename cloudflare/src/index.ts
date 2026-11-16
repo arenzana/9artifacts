@@ -11,6 +11,7 @@ import { handleMCP } from './mcp';
 import * as oauth from './oauth';
 import { getVersion } from './store';
 import { renderTemplate } from './template';
+import { handlePPTX } from './pptx';
 import { handleLLMs, handleText, wantsText } from './text';
 import { HttpError, b64url, json, jsonError, notFound, randomBytes, textError } from './util';
 
@@ -72,6 +73,7 @@ route('GET /api/artifacts', api.handleList, 'auth');
 route('POST /api/artifacts', api.handleCreate, 'auth');
 route('GET /api/artifacts/{id}', (c, p) => api.handleGet(c, p.id), 'auth');
 route('GET /api/artifacts/{id}/text', (c, p) => handleText(c, p.id), 'auth');
+route('GET /api/artifacts/{id}/pptx', (c, p) => handlePPTX(c, p.id), 'auth');
 route('PATCH /api/artifacts/{id}', (c, p) => api.handlePatch(c, p.id), 'auth');
 route('DELETE /api/artifacts/{id}', (c, p) => api.handleDelete(c, p.id), 'auth');
 route('POST /api/artifacts/{id}/versions', (c, p) => api.handleNewVersion(c, p.id), 'auth');

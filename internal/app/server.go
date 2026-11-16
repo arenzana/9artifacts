@@ -240,6 +240,7 @@ func (s *Server) routes() {
 	m.HandleFunc("POST /api/artifacts", s.auth(s.handleCreate))
 	m.HandleFunc("GET /api/artifacts/{id}", s.auth(s.handleGet))
 	m.HandleFunc("GET /api/artifacts/{id}/text", s.auth(s.handleText))
+	m.HandleFunc("GET /api/artifacts/{id}/pptx", s.auth(s.handlePPTX))
 	m.HandleFunc("PATCH /api/artifacts/{id}", s.auth(s.handlePatch))
 	m.HandleFunc("DELETE /api/artifacts/{id}", s.auth(s.handleDelete))
 	m.HandleFunc("POST /api/artifacts/{id}/versions", s.auth(s.handleNewVersion))

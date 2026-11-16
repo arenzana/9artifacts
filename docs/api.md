@@ -17,6 +17,7 @@ Errors are JSON: `{"error": "..."}`.
 | `POST` | `/api/artifacts/{id}/versions/{n}/restore` | — | `201` artifact: a copy of version `n` becomes the new latest |
 | `GET` | `/api/artifacts/{id}/download/{file}?v=N` | — | file as attachment |
 | `GET` | `/api/artifacts/{id}/text?v=N` | — | text form for agents (see below) |
+| `GET` | `/api/artifacts/{id}/pptx?v=N` | — | the entry file as an editable PowerPoint deck: one slide per `.slide`, or per h1/h2 of any other page; text only, the page's design is not carried over |
 | `POST` | `/api/artifacts/{id}/shares` | `{ttl: "1h"\|"24h"\|"7d"\|"30d", note?, version?, maxViews?, password?}` | `201` share, pinned to `version` (default: the current latest); `maxViews` stops the link after that many distinct visitors |
 | `DELETE` | `/api/artifacts/{id}/shares/{token}` | — | revoke |
 

@@ -254,8 +254,9 @@ signing in (no private notes, no share links) and can try every built-in theme. 
 - [x] Cloudflare Workers edition and a Tailscale build
 - [x] Six built-in themes and a read-only public demo mode (`--demo`)
 - [ ] Zip upload and folder upload from the browser
-- [x] Search inside artifact text (Go server)
+- [x] Search inside artifact text
 - [x] Slide and A4 document templates, animated diagram kit
+- [x] PowerPoint export (editable text, one slide per slide or heading)
 - [ ] Optional client-side encryption for share links
 - [ ] Read-only collaborators
 
