@@ -298,3 +298,12 @@ label{display:block;font-size:13px;font-weight:600;color:var(--text-2);margin:14
 .chip.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .check{display:flex;align-items:center;gap:8px;margin-top:14px;font:600 13px var(--font-ui);color:var(--text-2)}
 .check input{width:auto}
+.more-row{margin-top:14px;border-top:1px solid var(--border);padding-top:10px}
+.more-toggle{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:var(--text-2);font:600 13px var(--font-ui);cursor:pointer;padding:4px 0}
+.more-toggle:hover{color:var(--text)}
+.more-toggle .chev{display:inline-block;transition:transform .15s}
+.more-toggle.open .chev{transform:rotate(90deg)}
+.more-body{display:grid;gap:4px;margin-top:8px}
+.more-body[hidden]{display:none}
+.more-body .check{margin-top:8px}
+.more-body .settle{margin:6px 0 2px;font-size:12.5px}

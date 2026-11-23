@@ -700,11 +700,17 @@ async function downloadExport(fmt, q, el) {
   }
 }
 
-/* PDF export options: paper size, orientation, margins and page ranges.
-   The last-used settings stick around in localStorage. */
+/* PDF export options: paper size and page ranges up front; orientation and
+   margins sit behind "More options". The last-used settings persist in one
+   global localStorage key, so a paper picked on one artifact sticks for the
+   next. */
+const PDF_PAPER_KEY = '9a:export:paper';
+const PDF_OPTS_KEY = '9a:export:pdf';
+
 function pdfDefaults() {
   const d = { pageSize: 'A4', landscape: false, margins: 'default', pageRanges: '', widthMm: 148, heightMm: 210 };
-  try { return Object.assign(d, JSON.parse(localStorage.getItem('9artifacts.export.pdf') || '{}')); } catch { return d; }
+  try { d.pageSize = localStorage.getItem(PDF_PAPER_KEY) || d.pageSize; } catch { /* private mode */ }
+  try { return Object.assign(d, JSON.parse(localStorage.getItem(PDF_OPTS_KEY) || '{}')); } catch { return d; }
 }
 
 function closePdfDialog() {
@@ -732,11 +738,22 @@ function openPdfDialog(v) {
     }
   };
   paintChips();
+  const pages = h('input', { type: 'text', placeholder: 'All pages', value: d.pageRanges, 'aria-label': 'Pages' });
   const landscape = h('input', { type: 'checkbox', checked: d.landscape || null });
   const margins = h('select', { class: 'compact-select', 'aria-label': 'Margins' },
     h('option', { value: 'default', text: 'Default', selected: d.margins !== 'none' || null }),
     h('option', { value: 'none', text: 'None', selected: d.margins === 'none' || null }));
-  const pages = h('input', { type: 'text', placeholder: 'All pages', value: d.pageRanges, 'aria-label': 'Pages' });
+  const moreBody = h('div', { class: 'more-body', hidden: true },
+    h('label', { class: 'check' }, landscape, ' Landscape orientation'),
+    h('div', { class: 'export-row' }, h('span', { class: 'export-label', text: 'Margins' }), margins),
+    h('p', { class: 'muted settle', text: 'Renders after a 500 ms settle, then downloads.' }));
+  const moreBtn = h('button', { class: 'more-toggle', type: 'button', 'aria-expanded': 'false',
+    onclick: () => {
+      const open = moreBody.hidden;
+      moreBody.hidden = !open;
+      moreBtn.classList.toggle('open', open);
+      moreBtn.setAttribute('aria-expanded', String(open));
+    } }, 'More options', h('span', { class: 'chev', 'aria-hidden': 'true', text: '›' }));
   const go = h('button', { class: 'btn primary', type: 'button', text: 'Export PDF' });
   go.addEventListener('click', () => {
     const q = exportQuery(v);
@@ -754,9 +771,10 @@ function openPdfDialog(v) {
     if (landscape.checked) q.set('landscape', 'true');
     if (pages.value.trim()) q.set('pageRanges', pages.value.trim());
     try {
-      localStorage.setItem('9artifacts.export.pdf', JSON.stringify({
-        pageSize, landscape: landscape.checked, margins: margins.value,
-        pageRanges: pages.value.trim(), widthMm: Number(wIn.value) || d.widthMm, heightMm: Number(hIn.value) || d.heightMm,
+      localStorage.setItem(PDF_PAPER_KEY, pageSize);
+      localStorage.setItem(PDF_OPTS_KEY, JSON.stringify({
+        landscape: landscape.checked, margins: margins.value, pageRanges: pages.value.trim(),
+        widthMm: Number(wIn.value) || d.widthMm, heightMm: Number(hIn.value) || d.heightMm,
       }));
     } catch { /* private mode */ }
     closePdfDialog();
@@ -769,9 +787,8 @@ function openPdfDialog(v) {
       h('p', { class: 'muted', text: `${a.title} — v${v.n}` }),
       h('div', { class: 'export-row' }, h('span', { class: 'export-label', text: 'Paper' }), chips),
       dimsRow,
-      h('label', { class: 'check' }, landscape, ' Landscape orientation'),
-      h('div', { class: 'export-row' }, h('span', { class: 'export-label', text: 'Margins' }), margins),
       h('div', { class: 'export-row' }, h('span', { class: 'export-label', text: 'Pages' }), pages),
+      h('div', { class: 'more-row' }, moreBtn, moreBody),
       h('div', { class: 'onboard-links' }, h('span', { class: 'spacer' }), go)));
   document.body.append(box);
   go.focus();
